@@ -2,15 +2,15 @@
 
 This is a set of parsers to automate and perform data extraction from P2P platforms.
 
-It contains a few statistics (fees paid, total interests, last month account statement etc..)
+It also contains a few statistics method to get overview of account statement (fees paid, total interests, last month account statement etc..)
 
 
 ## Zonky (zonky.cz)
 
-Data extraction is based on an export file from account wallet.xls (penezenka) - wallet.xls
+Data extraction is based on an export file from account (penezenka) - wallet.xls
 
-- It starts with the python script zonky.cz
 - Download the wallet.xls to ~/data folder
+- Start with the python script zonky.cz
 - To standardize I/O and to avoid XLS file handling, convert wallet.xls to zonky.csv using **-c** flag **first**.
 - Execute ~/zonky.py -h to show help. 
 

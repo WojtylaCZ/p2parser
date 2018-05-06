@@ -141,8 +141,8 @@ def getTotalByMonth():
             else:
                 previousMonthYear = 12, currentMonthDate.year - 1
 
-            print(utils.getTableLikeString(('Month', str(previousMonthYear[0])+"."+str(previousMonthYear[1]), round(previousMonthPrincipalRepaid, 2)
-                                            , round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2))))
+            print(utils.getTableLikeString(('Month', str(previousMonthYear[0])+"."+str(previousMonthYear[1]), round(
+                previousMonthPrincipalRepaid, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2))))
 
     print(utils.getTableLikeString(('Month', currentMonthDate.strftime('%-m.%Y'), round(principalRepaid, 2), round(interestsReceived, 2))))
 
