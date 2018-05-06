@@ -178,7 +178,7 @@ def getPreviousMonth():
 def main():
     parser = argparse.ArgumentParser(description='This script produces statistics based on Zonky\'s export file.')
     parser.add_argument('-c', '--convertxls', dest='convertXls', action='store_true',
-                        default=False, help='Converting wallet.xls to wallet.csv')
+                        default=False, help='Converting ./data/wallet.xls to ./data/wallet.csv')
     parser.add_argument('-f',  '--fees', dest='getFees', action='store_true', default=False, help='Paid fees to Zonky')
     parser.add_argument('-t', '--total', dest='getTotals', action='store_true', default=False, help='Account statement')
     parser.add_argument('-tbm', '--totalbymonth', dest='getTotalByMonth', action='store_true', default=False, help='Account statement per month')
