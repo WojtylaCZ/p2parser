@@ -74,10 +74,10 @@ def getFees():
     for row in getDataFromCSVfile(DATA_FOLDER + ZONKY_CSV_FILE):
         rowData = getRowData(row)
         if rowData['fee']:
-            print(rowData['rawDate'], '\t', rowData['fee'])
+            yield (rowData['fee'], rowData['rawDate'])
             fees = fees + rowData['fee']
 
-    print(utils.getTableLikeString((round(fees, 2), 'Total fees paid')))
+    yield (round(fees, 2), 'Total fees paid')
 
 
 def getTotals():
@@ -98,10 +98,10 @@ def getTotals():
         if rowData['fee']:
             fees = fees + rowData['fee']
 
-    print(utils.getTableLikeString((round(principalRepaid, 2), 'Total principal repaid')))
-    print(utils.getTableLikeString((round(interestsReceived, 2), 'Total interests received')))
-    print(utils.getTableLikeString((round(charges, 2), 'Total charges received')))
-    print(utils.getTableLikeString((round(fees, 2), 'Total fees paid')))
+    yield(round(principalRepaid, 2), 'Total principal repaid')
+    yield(round(interestsReceived, 2), 'Total interests received')
+    yield(round(charges, 2), 'Total charges received')
+    yield(round(fees, 2), 'Total fees paid')
 
 
 def getTotalByMonth():
@@ -113,7 +113,7 @@ def getTotalByMonth():
 
     currentMonthDate = datetime.strptime('1.1.2000', '%d.%m.%Y')
 
-    print(utils.getTableLikeString(('Month', 'X', 'Prinp.', 'Inter.', 'Fee')))
+    yield('Month', 'X', 'Prinp.', 'Inter.', 'Fee')
 
     for row in getDataFromCSVfile(DATA_FOLDER+ZONKY_CSV_FILE):
         rowData = getRowData(row)
@@ -141,10 +141,10 @@ def getTotalByMonth():
             else:
                 previousMonthYear = 12, currentMonthDate.year - 1
 
-            print(utils.getTableLikeString(('Month', str(previousMonthYear[0])+"."+str(previousMonthYear[1]), round(
-                previousMonthPrincipalRepaid, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2))))
+            yield('Month', str(previousMonthYear[0])+"."+str(previousMonthYear[1]), round(
+                previousMonthPrincipalRepaid, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2))
 
-    print(utils.getTableLikeString(('Month', currentMonthDate.strftime('%-m.%Y'), round(principalRepaid, 2), round(interestsReceived, 2))))
+    yield('Month', currentMonthDate.strftime('%-m.%Y'), round(principalRepaid, 2), round(interestsReceived, 2))
 
 
 def getPreviousMonth():
@@ -170,9 +170,9 @@ def getPreviousMonth():
         if rowData['fee']:
             feePaid = rowData['fee']
 
-    print(utils.getTableLikeString((round(principalRepaid, 2), 'Total principal repaid')))
-    print(utils.getTableLikeString((round(interestsReceived, 2), 'Total interests received')))
-    print(utils.getTableLikeString((round(feePaid, 2), 'Fee paid')))
+    yield (round(principalRepaid, 2), 'Total principal repaid')
+    yield (round(interestsReceived, 2), 'Total interests received')
+    yield (round(feePaid, 2), 'Fee paid')
 
 
 def main():
@@ -185,18 +185,24 @@ def main():
     parser.add_argument('-p', '--previousmonth', dest='getPreviousMonth', action='store_true', default=False, help='Account statement for last month')
 
     args = parser.parse_args()
+    resultValues = []
+
     if args.convertXls:
         convertXLStoCSV()
     elif args.getFees:
-        getFees()
+        resultValues = getFees()
     elif args.getTotals:
-        getTotals()
+        resultValues = getTotals()
     elif args.getTotalByMonth:
-        getTotalByMonth()
+        resultValues = getTotalByMonth()
     elif args.getPreviousMonth:
-        getPreviousMonth()
+        resultValues = getPreviousMonth()
     else:
         parser.print_help()
+
+    for list in resultValues:
+        print(utils.getTabbedStringFromValueList(list))
+
     return
 
 
