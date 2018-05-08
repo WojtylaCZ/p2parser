@@ -24,7 +24,7 @@ def convertXLStoCSV():
     try:
         print('Trying to convert', zonkySourceFile, 'to', ZONKY_CSV_FILE)
         df = pd.read_excel(zonkySourceFile, 'all')
-        # df.fillna(0.0, inplace=True)
+
         print('File', zonkySourceFile, 'loaded.')
 
         df.to_csv(DATA_FOLDER + ZONKY_CSV_FILE, header=[str(x) for x in range(len(df.columns))], encoding='utf-8', index=False)
@@ -40,9 +40,6 @@ def getDataFromCSVfile(filename):
         reader = csv.DictReader(csvFile, delimiter=',')
 
         for row in reader:
-            if row['0'] == 'Datum':
-                dataTable = True
-                continue
             if dataTable:
                 if not row['3']:
                     row['3'] = 0.0
@@ -51,7 +48,10 @@ def getDataFromCSVfile(filename):
                 if not row['5']:
                     row['5'] = 0.0
                 yield row
-
+                continue
+            if row['0'] == 'Datum':
+                dataTable = True
+                continue
 
 def getRowData(row):
     fee = None
@@ -64,11 +64,12 @@ def getRowData(row):
             fee = float(row['3'])
 
         if row['2'] == 'Splátka půjčky':
+            totalReceived = float(row['3'])
             principalRepaid = float(row['4'])
             interestReceived = float(row['5'])
 
-            if round(float(row['3'])) != round(principalRepaid+interestReceived, 2):
-                chargesReceived = abs(float(row['3'])-(principalRepaid+interestReceived))
+            if round(totalReceived, 2) != round(principalRepaid+interestReceived, 2):
+                chargesReceived = abs(totalReceived-(principalRepaid+interestReceived))
 
         return {'rawDate': row['0'], 'fee': fee, 'principalRepaid': principalRepaid, 'interestReceived': interestReceived, 'chargesReceived': chargesReceived}
     except Exception as e:
