@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+P2P platform Zonky.cz parser for wallet.xls file and set of statistics functions
+"""
+
 import pandas as pd
 import csv
 from datetime import datetime
