@@ -11,8 +11,8 @@ Data extraction is based on an export file from account (penezenka) - wallet.xls
 
 - Download the wallet.xls to ~/data folder
 - Start with the python script zonky.cz
-- To standardize I/O and to avoid XLS file handling, convert wallet.xls to zonky.csv using **-c** flag **first**.
-- Execute ~/zonky.py -h to show help. 
+- To standardize I/O and to avoid XLS file handling, convert data/wallet.xls to data/zonky.csv using **-c** flag **first**.
+- Execute python zonky.py -h to show help. 
 
 ## Mintos (mintos.com)
 **_coming soon_**
