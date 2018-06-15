@@ -180,7 +180,7 @@ def getTotalByMonth():
 
     roi = 0.0
 
-    yield('Month', 'X', 'CiG', 'I.', 'Fee', 'ROI', 'Prinp.' )
+    yield('Month', 'CiG', 'I.', 'Fee', 'ROI', 'PrinpR.' )
 
     for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
         rowData = getRowData(row)
@@ -220,7 +220,7 @@ def getTotalByMonth():
             else:
                 previousMonthYear = 12, currentMonthDate.year - 1
 
-            yield('Month', str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), round(previousMonthCashInGame, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2), round(roi, 6), round(previousMonthPrincipalRepaid, 2))
+            yield(str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), round(previousMonthCashInGame, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2), round(roi, 6), round(previousMonthPrincipalRepaid, 2))
 
     # ongoing month
     # yield('Month', currentMonthDate.strftime('%-m.%Y'), round(principalRepaid, 2), round(interestsRgiteceived, 2), '', round(cashInGame, 2))
