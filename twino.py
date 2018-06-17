@@ -15,12 +15,12 @@ import utils
 
 DATA_FOLDER = 'data/'
 
-TWINO_ORIGINAL_FILE = 'InvestorAccountEntry_{number}.xlsx'
+TWINO_ORIGINAL_FILE = 'InvestorAccountEntry_{NUMBER_IN_FILENAME}.xlsx'
 TWINO_CSV_FILE = 'twino.csv'
 
 
 def convertXLStoCSV(number):
-    sourceFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + TWINO_ORIGINAL_FILE.format(number=number)
+    sourceFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + TWINO_ORIGINAL_FILE.format(NUMBER_IN_FILENAME=number)
     destinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + TWINO_CSV_FILE
     try:
         print('Trying to convert', sourceFile, 'to', TWINO_CSV_FILE)
@@ -235,7 +235,7 @@ def getCashFlow():
 
 def main():
     parser = argparse.ArgumentParser(description='This script produces statistics based on Twino\'s exported file.')
-    parser.add_argument('-c', '--convertxls', dest='convertXls', action='store', default=False, help='Converting ./data/{}.xls to ./data/twino.csv'.format(TWINO_ORIGINAL_FILE))
+    parser.add_argument('-c', '--convertxls', dest='convertXls', action='store', default=False, metavar=('NUMBER_IN_FILENAME'), help='Converting ./data/{} to ./data/twino.csv'.format(TWINO_ORIGINAL_FILE))
     parser.add_argument('-f', '--fees', dest='getFees', action='store_true', default=False, help='Paid fees to Zonky')
     parser.add_argument('-t', '--total', dest='getTotals', action='store_true', default=False, help='Account statement')
     parser.add_argument('-tbm', '--totalbymonth', dest='getTotalByMonth', action='store_true', default=False, help='Account statement per month')
