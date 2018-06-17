@@ -26,10 +26,9 @@ def convertXLStoCSV(number):
         print('Trying to convert', sourceFile, 'to', TWINO_CSV_FILE)
         df = pd.read_excel(sourceFile, 'Sheet0')
 
-
         print('File', sourceFile, 'loaded.')
 
-        #reverse row order
+        # reverse row order
         df = df[::-1]
 
         df.to_csv(destinationFile, header=[str(x) for x in range(len(df.columns))], encoding='utf-8', index=False)
@@ -172,7 +171,6 @@ def getTotalByMonth():
     previousMonthInterestsReceived = 0
     previousMonthCashInGame = 0
 
-
     currentMonthDate = datetime.strptime('1.1.2000', '%d.%m.%Y')
     currentMonthCashInGame = 0
 
@@ -180,7 +178,7 @@ def getTotalByMonth():
 
     roi = 0.0
 
-    yield('Month', 'CiG', 'Inter.', 'Fee', 'ROI', 'Princip.' )
+    yield('Month', 'CiG', 'Inter.', 'Fee', 'ROI', 'Princip.')
 
     for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
         rowData = getRowData(row)
@@ -212,7 +210,7 @@ def getTotalByMonth():
 
             # fee is negative number
             if previousMonthCashInGame > 0:
-                roi = (previousMonthInterestsReceived + previousMonthFee)/previousMonthCashInGame
+                roi = (previousMonthInterestsReceived + previousMonthFee) / previousMonthCashInGame
 
             # fee is the last transaction of the previous month
             if currentMonthDate.month - 1 > 0:
@@ -233,9 +231,11 @@ def getCashFlow():
         if rowData['cashFlowChange']:
             yield (rowData['rawDate'], rowData['cashFlowChange'])
 
+
 def main():
     parser = argparse.ArgumentParser(description='This script produces statistics based on Twino\'s exported file.')
-    parser.add_argument('-c', '--convertxls', dest='convertXls', action='store', default=False, metavar=('NUMBER_IN_FILENAME'), help='Converting ./data/{} to ./data/twino.csv'.format(TWINO_ORIGINAL_FILE))
+    parser.add_argument('-c', '--convertxls', dest='convertXls', action='store', default=False, metavar=('NUMBER_IN_FILENAME'),
+                        help='Converting ./data/{} to ./data/twino.csv'.format(TWINO_ORIGINAL_FILE))
     parser.add_argument('-f', '--fees', dest='getFees', action='store_true', default=False, help='Paid fees to Zonky')
     parser.add_argument('-t', '--total', dest='getTotals', action='store_true', default=False, help='Account statement')
     parser.add_argument('-tbm', '--totalbymonth', dest='getTotalByMonth', action='store_true', default=False, help='Account statement per month')
