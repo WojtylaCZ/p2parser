@@ -180,7 +180,7 @@ def getTotalByMonth():
 
     roi = 0.0
 
-    yield('Month', 'CiG', 'I.', 'Fee', 'ROI', 'PrinpR.' )
+    yield('Month', 'CiG', 'Inter.', 'Fee', 'ROI', 'Princip.' )
 
     for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
         rowData = getRowData(row)
