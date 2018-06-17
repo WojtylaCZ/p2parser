@@ -223,7 +223,7 @@ def getTotalByMonth():
             yield(str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), round(previousMonthCashInGame, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2), round(roi, 6), round(previousMonthPrincipalRepaid, 2))
 
     # ongoing month
-    # yield('Month', currentMonthDate.strftime('%-m.%Y'), round(principalRepaid, 2), round(interestsRgiteceived, 2), '', round(cashInGame, 2))
+    # yield(currentMonthDate.strftime('%-m.%Y'), round(cashInGame, 2), round(interestsReceived, 2), '', '', round(principalRepaid, 2))
 
 
 def getCashFlow():
