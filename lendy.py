@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-P2P platform Twino.eu parser for InvestorAccountEntry_XXXX.xls file and set of statistics functions
+P2P platform Lendy.co.uk parser for Lendy_Statement_YYYYMMDD-YYYYMMDD.csv file and set of statistics functions
 """
 
 import pandas as pd
@@ -15,16 +15,20 @@ import utils
 
 DATA_FOLDER = 'data/'
 
-TWINO_ORIGINAL_FILE = 'InvestorAccountEntry_{NUMBER_IN_FILENAME}.xlsx'
-TWINO_CSV_FILE = 'twino.csv'
+LENDY_CSV_FILE = 'lendy.csv'
 
 
-def convertXLStoCSV(number):
-    sourceFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + TWINO_ORIGINAL_FILE.format(NUMBER_IN_FILENAME=number)
-    destinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + TWINO_CSV_FILE
+def convertToStandardCSV(csvFilepath):
+
+    if not os.path.exists(csvFilepath):
+        print("File {} does NOT exists. END of script".format(csvFilepath))
+        os._exit(1)
+
+    sourceFile = csvFilepath
+    destinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + LENDY_CSV_FILE
     try:
-        print('Trying to convert', sourceFile, 'to', TWINO_CSV_FILE)
-        df = pd.read_excel(sourceFile, 'Sheet0')
+        print('Trying to convert', sourceFile, 'to', LENDY_CSV_FILE)
+        df = pd.read_csv(sourceFile)
 
         print('File', sourceFile, 'loaded.')
 
@@ -32,17 +36,19 @@ def convertXLStoCSV(number):
         df = df[::-1]
 
         df.to_csv(destinationFile, header=[str(x) for x in range(len(df.columns))], encoding='utf-8', index=False)
-        print('File', sourceFile, 'exported to', DATA_FOLDER + TWINO_CSV_FILE)
+        print('File', sourceFile, 'exported to', destinationFile)
     except Exception as e:
         print('Conversion failed.', e)
 
 
-def getDataFromCSVfile(filename):
+def getDataFromCSVfile(filepath):
 
-    with open(DATA_FOLDER + TWINO_CSV_FILE) as csvFile:
+    with open(filepath) as csvFile:
         reader = csv.DictReader(csvFile, delimiter=',')
 
         for row in reader:
+            if not row['0']:
+                continue
             if not row['5']:
                 row['5'] = 0.0
             yield row
@@ -56,19 +62,23 @@ def getRowData(row):
     cashFlowChange = None
 
     try:
-        if row['2'] == 'FUNDING':
-            cashFlowChange = float(row['5'])
+        if row['1'] == 'Deposit':
+            cashFlowChange = float(row['8'])
 
-        if row['3'] == 'INTEREST':
-            interestReceived = float(row['5'])
+        # TODO withdrawal?
+        # if row['1'] == 'Deposit':
+        #     cashFlowChange = float(row['8'])
 
-        if row['3'] == 'PENALTY':
-            chargesReceived = float(row['5'])
+        if row['1'] == 'Interest':
+            interestReceived = float(row['8'])
 
-        if row['3'] == 'PRINCIPAL' and row['2'] != 'BUY_SHARES':
-            principalRepaid = float(row['5'])
+        if row['1'] == 'Bonus':
+            chargesReceived = float(row['8'])
 
-        return {'rawDate': row['0'].split(' ')[0], 'fee': fee, 'principalRepaid': principalRepaid,
+        if row['1'] == 'Capital Repayment' or row['1'] == 'Capital repayment':
+            principalRepaid = float(row['8'])
+
+        return {'rawDate': row['0'], 'fee': fee, 'principalRepaid': principalRepaid,
                 'interestReceived': interestReceived, 'chargesReceived': chargesReceived, 'cashFlowChange': cashFlowChange}
     except Exception as e:
         print(e, row)
@@ -89,7 +99,7 @@ def getCashInGame(cashInGame, rowData):
 def getFees():
     fees = 0.0
 
-    for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
+    for row in getDataFromCSVfile(DATA_FOLDER + LENDY_CSV_FILE):
         rowData = getRowData(row)
         if rowData['fee']:
             yield (rowData['fee'], rowData['rawDate'])
@@ -105,7 +115,7 @@ def getTotals():
     fees = 0.0
     cashInGame = 0.0
 
-    for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
+    for row in getDataFromCSVfile(DATA_FOLDER + LENDY_CSV_FILE):
         rowData = getRowData(row)
         cashInGame = getCashInGame(cashInGame, rowData)
 
@@ -137,10 +147,10 @@ def getPreviousMonth():
     else:
         previousMonth = 12, datetime.today().year - 1
 
-    for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
+    for row in getDataFromCSVfile(DATA_FOLDER + LENDY_CSV_FILE):
         rowData = getRowData(row)
 
-        date = datetime.strptime(rowData['rawDate'], '%Y-%m-%d')
+        date = datetime.strptime(rowData['rawDate'], '%d/%m/%Y')
 
         if previousMonth == (date.month, date.year):
             if rowData['principalRepaid']:
@@ -180,10 +190,10 @@ def getTotalByMonth():
 
     yield('Month', 'CiG', 'Inter.', 'Fee', 'ROI', 'Princip.')
 
-    for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
+    for row in getDataFromCSVfile(DATA_FOLDER + LENDY_CSV_FILE):
         rowData = getRowData(row)
 
-        rowDate = datetime.strptime(rowData['rawDate'], '%Y-%m-%d')
+        rowDate = datetime.strptime(rowData['rawDate'], '%d/%m/%Y')
 
         if rowDate.month != currentMonthDate.month:
             previousMonthPrincipalRepaid = principalRepaid
@@ -225,7 +235,7 @@ def getTotalByMonth():
 
 
 def getCashFlow():
-    for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
+    for row in getDataFromCSVfile(DATA_FOLDER + LENDY_CSV_FILE):
         rowData = getRowData(row)
 
         if rowData['cashFlowChange']:
@@ -234,8 +244,8 @@ def getCashFlow():
 
 def main():
     parser = argparse.ArgumentParser(description='This script produces statistics based on Twino\'s exported file.')
-    parser.add_argument('-c', '--convertxls', dest='convertXls', action='store', default=False, metavar=('NUMBER_IN_FILENAME'),
-                        help='Converting ./data/{} to ./data/twino.csv'.format(TWINO_ORIGINAL_FILE))
+    parser.add_argument('-c', '--convert', dest='convert', action='store', default=False, metavar=('CSV_FILENAME'),
+                        help='Converting ./data/Lendy_Statement_YYYYMMDD-YYYYMMDD.csv to ./data/lendy.csv')
     parser.add_argument('-f', '--fees', dest='getFees', action='store_true', default=False, help='Paid fees to Zonky')
     parser.add_argument('-t', '--total', dest='getTotals', action='store_true', default=False, help='Account statement')
     parser.add_argument('-tbm', '--totalbymonth', dest='getTotalByMonth', action='store_true', default=False, help='Account statement per month')
@@ -245,8 +255,8 @@ def main():
     args = parser.parse_args()
     resultValues = []
 
-    if args.convertXls:
-        convertXLStoCSV(args.convertXls)
+    if args.convert:
+        convertToStandardCSV(args.convert)
     elif args.getFees:
         resultValues = getFees()
     elif args.getTotals:
