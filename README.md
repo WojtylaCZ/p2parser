@@ -1,8 +1,23 @@
 # P2Parser toolkit
 
-This is a set of parsers to automate and perform data extraction from P2P platforms.
+This toolkit provides an overview about your money/investments on major P2P platforms. For example, would you like to know **how much money have you received on interests last month** or **what is your ROI at different P2P platforms**? 
+Then this toolkit is for you.
+
+This toolkit is a set of same functions for different P2P platforms. 
 
 It contains statistics methods to get your account statement (ROI, fees paid, total interests, last month stats.)
+
+So far, there are following summary statistic functions (if you wish to have more or different one, open an issue, write me!):
+
+```
+  -f,   --fees              Fees paid
+  -t,   --total             Total account statement
+  -tbm, --totalbymonth      Account statement per month
+  -p,   --previousmonth     Account statement for last month
+  -cf,  --cashflow          Cashflow actions within the account
+```
+
+The output looks like following example. Values are separated by a tab space, so you can conveniently copy that to any spreadsheet while keeping the table layout.
 
 ```
 Month       CashInGame  Inter.	    Fee         ROI         Prinp.
@@ -50,7 +65,7 @@ python twino.py -tbm
 
 Data extraction is based on exported file from your account (penezenka) - wallet.xls
 
-- To convert data/wallet.xls to data/zonky.csv,  use first:
+- To convert `data/wallet.xls` to `data/zonky.csv`,  use first:
 ```
 python zonky.py -c
 ```
@@ -62,7 +77,7 @@ python zonky.py -c
 
 ## Twino ([twino.eu](https://twino.eu))
 
-- To convert data/InvestorAccountEntry_NUMBER.xlsx to data/twino.csv, start with:
+- To convert `data/InvestorAccountEntry_NUMBER.xlsx` to `data/twino.csv`, start with:
 
 ```
 python twino.py -c NUMBER
