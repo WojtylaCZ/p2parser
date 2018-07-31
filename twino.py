@@ -15,30 +15,39 @@ import utils
 
 DATA_FOLDER = 'data/'
 
-TWINO_ORIGINAL_FILE = 'InvestorAccountEntry_{NUMBER_IN_FILENAME}.xlsx'
 TWINO_CSV_FILE = 'twino.csv'
 
 
-def convertXLStoCSV(number):
-    sourceFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + TWINO_ORIGINAL_FILE.format(NUMBER_IN_FILENAME=number)
-    destinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + TWINO_CSV_FILE
+def convertXLStoCSV(sourceFile):
     try:
-        print('Trying to convert', sourceFile, 'to', TWINO_CSV_FILE)
-        df = pd.read_excel(sourceFile, 'Sheet0')
+        destinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + TWINO_CSV_FILE
+        print('Trying to load', sourceFile)
 
+        df = pd.read_excel(sourceFile, 'Sheet0')
         print('File', sourceFile, 'loaded.')
+
+        # quick content check
+        if list(df) == ['Processing Date', 'Booking Date', 'Type', 'Description', 'Loan Number', 'amount']:
+            print('File content format looks good.')
+        else:
+            raise Exception('File content format looks bad. Sorry')
 
         # reverse row order
         df = df[::-1]
 
         df.to_csv(destinationFile, header=[str(x) for x in range(len(df.columns))], encoding='utf-8', index=False)
-        print('File', sourceFile, 'exported to', DATA_FOLDER + TWINO_CSV_FILE)
+        print('File', sourceFile, 'converted to', destinationFile)
+
+        print('First 2 lines of the content:')
+        print(df.head(2).to_string(index=False, header=False))
+
+        print('Last 2 lines of the content:')
+        print(df.tail(2).to_string(index=False, header=False))
     except Exception as e:
         print('Conversion failed.', e)
 
 
 def getDataFromCSVfile(filename):
-
     with open(DATA_FOLDER + TWINO_CSV_FILE) as csvFile:
         reader = csv.DictReader(csvFile, delimiter=',')
 
@@ -137,6 +146,7 @@ def getPreviousMonth():
     else:
         previousMonth = 12, datetime.today().year - 1
 
+    yield (str(previousMonth[0]) + "." + str(previousMonth[1]), 'Considered month')
     for row in getDataFromCSVfile(DATA_FOLDER + TWINO_CSV_FILE):
         rowData = getRowData(row)
 
@@ -234,12 +244,13 @@ def getCashFlow():
 
 def main():
     parser = argparse.ArgumentParser(description='This script produces statistics based on Twino\'s exported file.')
-    parser.add_argument('-c', '--convertxls', dest='convertXls', action='store', default=False, metavar=('NUMBER_IN_FILENAME'),
-                        help='Converting ./data/{} to ./data/twino.csv'.format(TWINO_ORIGINAL_FILE))
-    parser.add_argument('-f', '--fees', dest='getFees', action='store_true', default=False, help='Paid fees to Zonky')
-    parser.add_argument('-t', '--total', dest='getTotals', action='store_true', default=False, help='Account statement')
+    parser.add_argument('-c', '--convertxls', dest='convertXls', action='store', default=False, metavar=('FILEPATH'),
+                        help='Converting FILEPATH to ' + DATA_FOLDER + TWINO_CSV_FILE)
+    parser.add_argument('-f', '--fees', dest='getFees', action='store_true', default=False, help='Paid fees')
+    parser.add_argument('-t', '--total', dest='getTotals', action='store_true', default=False, help='Account statement total')
     parser.add_argument('-tbm', '--totalbymonth', dest='getTotalByMonth', action='store_true', default=False, help='Account statement per month')
-    parser.add_argument('-p', '--previousmonth', dest='getPreviousMonth', action='store_true', default=False, help='Account statement for last month')
+    parser.add_argument('-p', '--previousmonth', dest='getPreviousMonth', action='store_true',
+                        default=False, help='Account statement for previous month from today')
     parser.add_argument('-cf', '--cashflow', dest='getCashFlow', action='store_true', default=False, help='Cashflow actions within the account')
 
     args = parser.parse_args()
