@@ -104,10 +104,10 @@ def getFees():
     for row in getDataFromCSVfile(DATA_FOLDER + ZONKY_CSV_FILE):
         rowData = getRowData(row)
         if rowData['fee']:
-            yield (rowData['fee'], rowData['rawDate'])
+            yield (rowData['rawDate'], rowData['fee'])
             fees = fees + rowData['fee']
 
-    yield (round(fees, 2), 'Total fees paid')
+    yield ('Total fee', round(fees, 2))
 
 
 def getTotals():
@@ -130,6 +130,14 @@ def getTotals():
         if rowData['fee']:
             fees = fees + rowData['fee']
 
+    yield('-----------------------Zonky web totals-----------------------',)
+    yield(round(interestsReceived + charges + fees, 2), round(fees, 2))
+    yield('Earned', 'Total fee')
+    yield ('---',)
+    yield(round(principalRepaid, 2), round(interestsReceived, 2), round(charges, 2))
+    yield ('Principals', 'Interests', 'Charges')
+    yield ('-------------------------------------------------------------',)
+
     yield(round(cashInGame, 2), 'Cash in game')
     yield(round(interestsReceived, 2), 'Total interests received')
     yield(round(charges, 2), 'Total charges received')
@@ -146,7 +154,6 @@ def getTotalByMonth():
     previousMonthInterestsReceived = 0
     previousMonthCashInGame = 0
 
-
     currentMonthDate = datetime.strptime('1.1.2000', '%d.%m.%Y')
     currentMonthCashInGame = 0
 
@@ -154,7 +161,7 @@ def getTotalByMonth():
 
     roi = 0.0
 
-    yield('Month', 'CashInGame', 'Inter.', 'Fee', 'ROI', 'Prinp.' )
+    yield('Month', 'CashInGame', 'Inter.', 'Fee', 'ROI', 'Prinp.')
 
     for row in getDataFromCSVfile(DATA_FOLDER + ZONKY_CSV_FILE):
         rowData = getRowData(row)
@@ -186,7 +193,7 @@ def getTotalByMonth():
 
             # fee is negative number
             if previousMonthCashInGame > 0:
-                roi = (previousMonthInterestsReceived + previousMonthFee)/previousMonthCashInGame
+                roi = (previousMonthInterestsReceived + previousMonthFee) / previousMonthCashInGame
 
             # fee is the last transaction of the previous month
             if currentMonthDate.month - 1 > 0:
@@ -194,7 +201,7 @@ def getTotalByMonth():
             else:
                 previousMonthYear = 12, currentMonthDate.year - 1
 
-            yield(str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), round(previousMonthCashInGame, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2), round(roi, 6), round(previousMonthPrincipalRepaid, 2))
+            yield(str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), round(previousMonthCashInGame, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2), format(roi, '.4f'), round(previousMonthPrincipalRepaid, 2))
 
     # ongoing month
     # yield('Month', currentMonthDate.strftime('%-m.%Y'), round(principalRepaid, 2), round(interestsRgiteceived, 2), '', round(cashInGame, 2))
@@ -233,9 +240,9 @@ def getPreviousMonth():
             feePaid = rowData['fee']
 
     yield (round(cashInGameForThisMonth, 2), 'Cash in game for this month')
-    yield (round(interestsReceived, 2), 'Total interests received')
-    yield (round(feePaid, 2), 'Fee paid')
     yield (round(principalRepaid, 2), 'Total principal repaid')
+    yield (round(interestsReceived, 2), 'Total interests received')
+    yield (round(feePaid, 2), 'Fee paid  ')
 
 
 def getCashFlow():
