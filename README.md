@@ -104,7 +104,7 @@ python lendy.py -c data/Lendy_Statement_YYYYMMDD-YYYYMMDD.csv
 ### Codestyle:
 To follow pep8 codestyle, see mistakes by:
 ```
-pycodestyle FILEPATH
+pycodestyle --show-pep8 FILEPATH
 ```
 
 To auto apply possible changes, use:

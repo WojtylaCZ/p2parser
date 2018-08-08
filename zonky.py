@@ -19,17 +19,19 @@ ZONKY_ORIGINAL_FILE = 'wallet.xls'
 ZONKY_CSV_FILE = 'zonky.csv'
 
 
-def convertXLStoCSV():
-    zonkySourceFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + ZONKY_ORIGINAL_FILE
-    zonkyDestinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + ZONKY_CSV_FILE
+def convertXLStoCSV(sourceFile):
     try:
-        print('Trying to convert', zonkySourceFile, 'to', ZONKY_CSV_FILE)
-        df = pd.read_excel(zonkySourceFile, 'all')
+        destinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + ZONKY_CSV_FILE
+        print('Trying to load', sourceFile)
 
-        print('File', zonkySourceFile, 'loaded.')
+        df = pd.read_excel(sourceFile, 'all')
+        print('File', sourceFile, 'loaded.')
 
-        df.to_csv(zonkyDestinationFile, header=[str(x) for x in range(len(df.columns))], encoding='utf-8', index=False)
-        print('File', zonkySourceFile, 'exported to', DATA_FOLDER + ZONKY_CSV_FILE)
+        df.to_csv(destinationFile, header=[str(x) for x in range(len(df.columns))], encoding='utf-8', index=False)
+        print('File', sourceFile, 'converted to', destinationFile)
+
+        print('Last 2 lines of the content:')
+        print(df.tail(2).to_string(index=False, header=False))
     except Exception as e:
         print('Conversion failed.', e)
 
@@ -104,10 +106,10 @@ def getFees():
     for row in getDataFromCSVfile(DATA_FOLDER + ZONKY_CSV_FILE):
         rowData = getRowData(row)
         if rowData['fee']:
-            yield (rowData['rawDate'], rowData['fee'])
+            yield (rowData['rawDate'], format(rowData['fee'], '.2f'))
             fees = fees + rowData['fee']
 
-    yield ('Total fee', round(fees, 2))
+    yield ('Total fee', format(fees, '.2f'))
 
 
 def getTotals():
@@ -131,18 +133,18 @@ def getTotals():
             fees = fees + rowData['fee']
 
     yield('-----------------------Zonky web totals-----------------------',)
-    yield(round(interestsReceived + charges + fees, 2), round(fees, 2))
+    yield(format(interestsReceived + charges + fees, '.2f'), format(fees, '.2f'))
     yield('Earned', 'Total fee')
     yield ('---',)
-    yield(round(principalRepaid, 2), round(interestsReceived, 2), round(charges, 2))
+    yield(format(principalRepaid, '.2f'), format(interestsReceived, '.2f'), format(charges, '.2f'))
     yield ('Principals', 'Interests', 'Charges')
     yield ('-------------------------------------------------------------',)
 
-    yield(round(cashInGame, 2), 'Cash in game')
-    yield(round(interestsReceived, 2), 'Total interests received')
-    yield(round(charges, 2), 'Total charges received')
-    yield(round(fees, 2), 'Total fees paid')
-    yield(round(principalRepaid, 2), 'Total principal repaid')
+    yield(format(cashInGame, '.2f'), 'Cash in game')
+    yield(format(interestsReceived, '.2f'), 'Total interests received')
+    yield(format(charges, '.2f'), 'Total charges received')
+    yield(format(fees, '.2f'), 'Total fees paid')
+    yield(format(principalRepaid, '.2f'), 'Total principal repaid')
 
 
 def getTotalByMonth():
@@ -161,7 +163,7 @@ def getTotalByMonth():
 
     roi = 0.0
 
-    yield('Month', 'CashInGame', 'Inter.', 'Fee', 'ROI', 'Prinp.')
+    yield('Month', 'CashInGame', 'Inter.', 'Fee', 'ROI', 'Princip.')
 
     for row in getDataFromCSVfile(DATA_FOLDER + ZONKY_CSV_FILE):
         rowData = getRowData(row)
@@ -201,7 +203,9 @@ def getTotalByMonth():
             else:
                 previousMonthYear = 12, currentMonthDate.year - 1
 
-            yield(str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), round(previousMonthCashInGame, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2), format(roi, '.4f'), round(previousMonthPrincipalRepaid, 2))
+            yield(str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), format(previousMonthCashInGame, '.2f'),
+                  format(previousMonthInterestsReceived, '.2f'), format(previousMonthFee, '.2f'), format(roi, '.4f'),
+                  format(previousMonthPrincipalRepaid, '.2f'))
 
     # ongoing month
     # yield('Month', currentMonthDate.strftime('%-m.%Y'), round(principalRepaid, 2), round(interestsRgiteceived, 2), '', round(cashInGame, 2))
@@ -219,6 +223,8 @@ def getPreviousMonth():
         previousMonth = datetime.today().month - 1, datetime.today().year
     else:
         previousMonth = 12, datetime.today().year - 1
+
+    yield (str(previousMonth[0]) + "." + str(previousMonth[1]), 'Considered month')
 
     for row in getDataFromCSVfile(DATA_FOLDER + ZONKY_CSV_FILE):
         rowData = getRowData(row)
@@ -239,10 +245,10 @@ def getPreviousMonth():
         if rowData['fee']:
             feePaid = rowData['fee']
 
-    yield (round(cashInGameForThisMonth, 2), 'Cash in game for this month')
-    yield (round(principalRepaid, 2), 'Total principal repaid')
-    yield (round(interestsReceived, 2), 'Total interests received')
-    yield (round(feePaid, 2), 'Fee paid  ')
+    yield (format(cashInGameForThisMonth, '.2f'), 'Cash in game for this month')
+    yield (format(principalRepaid, '.2f'), 'Total principal repaid')
+    yield (format(interestsReceived, '.2f'), 'Total interests received')
+    yield (format(feePaid, '.2f'), 'Fee paid   ')
 
 
 def getCashFlow():
@@ -250,13 +256,19 @@ def getCashFlow():
         rowData = getRowData(row)
 
         if rowData['cashFlowChange']:
-            yield (rowData['rawDate'], rowData['cashFlowChange'])
+            yield (rowData['rawDate'], format(rowData['cashFlowChange'], '.0f'))
 
 
 def main():
     parser = argparse.ArgumentParser(description='This script produces statistics based on Zonky\'s export file.')
-    parser.add_argument('-c', '--convertxls', dest='convertXls', action='store_true',
-                        default=False, help='Converting ./data/wallet.xls to ./data/wallet.csv')
+    parser.add_argument(
+        '-c',
+        '--convertxls',
+        dest='convertXls',
+        action='store',
+        default=False,
+        metavar=('FILEPATH'),
+        help='Converting FILEPATH to ' + DATA_FOLDER + ZONKY_CSV_FILE)
     parser.add_argument('-f', '--fees', dest='getFees', action='store_true', default=False, help='Paid fees to Zonky')
     parser.add_argument('-t', '--total', dest='getTotals', action='store_true', default=False, help='Account statement')
     parser.add_argument('-tbm', '--totalbymonth', dest='getTotalByMonth', action='store_true', default=False, help='Account statement per month')
@@ -267,7 +279,7 @@ def main():
     resultValues = []
 
     if args.convertXls:
-        convertXLStoCSV()
+        convertXLStoCSV(args.convertXls)
     elif args.getFees:
         resultValues = getFees()
     elif args.getTotals:
