@@ -57,17 +57,17 @@ python twino.py -tbm
 
 ## General info
 
-1. Download an export file from your account first to `~/data` folder.
-2. Convert it to **.csv** file using the script. Reason behind this is to standardize a common source and to avoid _.xls, .xlsx, .pages etc._ file types handling.
+1. Download an account statement, transaction export or other log file within your account from the platform first.
+2. Convert it to **.csv** file using the script. The reason behind this is to standardize a common source and to avoid _.xls, .xlsx, .pages etc._ file types handling.
 3. Run the appropriate script with the **-h** parameter to know what the parser can do for you. You can run it in a fashion `python foo.py -h` or `./foo.py -h`.
 
 ## Zonky ([zonky.cz](https://zonky.cz))
 
-Data extraction is based on exported file from your account (penezenka) - wallet.xls
+Data extraction is based on exported file from your account (penezenka) - `wallet.xls`
 
-- To convert `data/wallet.xls` to `data/zonky.csv`,  use first:
+- To convert `wallet.xls` at `FILEPATH` to `data/zonky.csv`,  use first:
 ```
-python zonky.py -c
+python zonky.py -c FILEPATH
 ```
 
 - Execute python `python zonky.py -h` to show options.
@@ -77,22 +77,26 @@ python zonky.py -c
 
 ## Twino ([twino.eu](https://twino.eu))
 
-- To convert `data/InvestorAccountEntry_NUMBER.xlsx` to `data/twino.csv`, start with:
+- To convert `InvestorAccountEntry_WXYZ.xlsx` at `FILEPATH` to `data/twino.csv`, start with:
 
 ```
-python twino.py -c NUMBER
+python twino.py -c FILEPATH
 ```
 - Execute python `python twino.py -h` to show options.
 
 ## Lendy ([lendy.co.uk](https://lendy.co.uk))
 
-- Lendy export file with transaction history is already a CSV file, but it still needs to be converted to get better and standardized output.
-- Therefore, start with the command below using whatever path of the original file. That will create `data/lendy.csv` file.
+- Lendy's transaction history logfile is already a CSV file, but it still needs to be converted to get better and standardized output.
+- Therefore, start with the command below using whatever FILEPATH to the original file. That will create `data/lendy.csv` file.
 
 ```
-python lendy.py -c data/Lendy_Statement_YYYYMMDD-YYYYMMDD.csv
+python lendy.py -c FILEPATH
 ````
 - Then, you can run the script to get different statistics as usual, run `python lendy.py -h`
+
+
+## Lending club ([lendingclub.com](https://lendingclub.com/))
+**_coming soon_**
 
 ## Contributing
 1. Fork it (<https://github.com/WojtylaCZ/p2parser/fork>)
