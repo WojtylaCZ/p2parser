@@ -100,3 +100,14 @@ python lendy.py -c data/Lendy_Statement_YYYYMMDD-YYYYMMDD.csv
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
 5. Create a new Pull Request
+
+### Codestyle:
+To follow pep8 codestyle, see mistakes by:
+```
+pycodestyle --show-pep8 FILEPATH
+```
+
+To auto apply possible changes, use:
+```
+autopep8 --in-place --aggressive --aggressive FILEPATH
+```
