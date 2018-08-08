@@ -256,7 +256,7 @@ def getCashFlow():
         rowData = getRowData(row)
 
         if rowData['cashFlowChange']:
-            yield (rowData['rawDate'], format(rowData['cashFlowChange'], '.0f'))
+            yield (rowData['rawDate'], format(rowData['cashFlowChange'], '.2f'))
 
 
 def main():

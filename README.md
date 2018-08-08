@@ -109,5 +109,5 @@ pycodestyle --show-pep8 FILEPATH
 
 To auto apply possible changes, use:
 ```
-autopep8 --in-place --aggressive --aggressive FILEPATH
+autopep8 -v --in-place --aggressive --aggressive FILEPATH
 ```

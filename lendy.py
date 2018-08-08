@@ -18,25 +18,41 @@ DATA_FOLDER = 'data/'
 LENDY_CSV_FILE = 'lendy.csv'
 
 
-def convertToStandardCSV(csvFilepath):
-
-    if not os.path.exists(csvFilepath):
-        print("File {} does NOT exists. END of script".format(csvFilepath))
-        os._exit(1)
-
-    sourceFile = csvFilepath
-    destinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + LENDY_CSV_FILE
+def convertToStandardCSV(sourceFile):
     try:
-        print('Trying to convert', sourceFile, 'to', LENDY_CSV_FILE)
-        df = pd.read_csv(sourceFile)
+        destinationFile = os.path.dirname(os.path.realpath(__file__)) + '/' + DATA_FOLDER + LENDY_CSV_FILE
+        print('Trying to load', sourceFile)
 
+        df = pd.read_csv(sourceFile)
         print('File', sourceFile, 'loaded.')
+
+        # quick content check
+        if list(df) == [
+            'Txn Date',
+            'Transaction type',
+            'Loan part ID',
+            'Loan part value',
+            'Loan part detail',
+            'Loan ID',
+            'Start date',
+            'End date',
+            'Txn Amount',
+                'Balance']:
+            print('File content format looks good.')
+        else:
+            raise Exception('File content format looks bad. Sorry')
 
         # reverse row order
         df = df[::-1]
 
         df.to_csv(destinationFile, header=[str(x) for x in range(len(df.columns))], encoding='utf-8', index=False)
-        print('File', sourceFile, 'exported to', destinationFile)
+        print('File', sourceFile, 'converted to', destinationFile)
+
+        print('First 2 lines of the content:')
+        print(df.head(2).to_string(index=False, header=False))
+
+        print('Last 2 lines of the content:')
+        print(df.tail(2).to_string(index=False, header=False))
     except Exception as e:
         print('Conversion failed.', e)
 
@@ -73,7 +89,7 @@ def getRowData(row):
             interestReceived = float(row['8'])
 
         if row['1'] == 'Bonus':
-            chargesReceived = float(row['8'])
+            interestReceived = float(row['8'])
 
         if row['1'] == 'Capital Repayment' or row['1'] == 'Capital repayment':
             principalRepaid = float(row['8'])
@@ -102,10 +118,10 @@ def getFees():
     for row in getDataFromCSVfile(DATA_FOLDER + LENDY_CSV_FILE):
         rowData = getRowData(row)
         if rowData['fee']:
-            yield (rowData['fee'], rowData['rawDate'])
+            yield (rowData['rawDate'], format(rowData['fee'], '.2f'))
             fees = fees + rowData['fee']
 
-    yield (round(fees, 2), 'Total fees paid')
+    yield ('Total fee', format(fees, '.2f'))
 
 
 def getTotals():
@@ -128,10 +144,11 @@ def getTotals():
         if rowData['fee']:
             fees = fees + rowData['fee']
 
-    yield(round(cashInGame, 2), 'Cash in game')
-    yield(round(interestsReceived, 2), 'Total interests received')
-    yield(round(charges, 2), 'Total charges received')
-    yield(round(fees, 2), 'Total fees paid')
+    yield(format(cashInGame, '.2f'), 'Cash in game')
+    yield(format(interestsReceived, '.2f'), 'Total interests received')
+    yield(format(charges, '.2f'), 'Total charges received')
+    yield(format(fees, '.2f'), 'Total fees paid')
+    yield(format(principalRepaid, '.2f'), 'Total principal repaid')
 
 
 def getPreviousMonth():
@@ -146,6 +163,8 @@ def getPreviousMonth():
         previousMonth = datetime.today().month - 1, datetime.today().year
     else:
         previousMonth = 12, datetime.today().year - 1
+
+    yield (str(previousMonth[0]) + "." + str(previousMonth[1]), 'Considered month')
 
     for row in getDataFromCSVfile(DATA_FOLDER + LENDY_CSV_FILE):
         rowData = getRowData(row)
@@ -166,10 +185,10 @@ def getPreviousMonth():
         if rowData['fee']:
             feePaid = rowData['fee']
 
-    yield (round(cashInGameForThisMonth, 2), 'Cash in game for this month')
-    yield (round(interestsReceived, 2), 'Total interests received')
-    yield (round(feePaid, 2), 'Fee paid')
-    yield (round(principalRepaid, 2), 'Total principal repaid')
+    yield (format(cashInGameForThisMonth, '.2f'), 'Cash in game for this month')
+    yield (format(principalRepaid, '.2f'), 'Total principal repaid')
+    yield (format(interestsReceived, '.2f'), 'Total interests received')
+    yield (format(feePaid, '.2f'), 'Fee paid   ')
 
 
 def getTotalByMonth():
@@ -188,7 +207,7 @@ def getTotalByMonth():
 
     roi = 0.0
 
-    yield('Month', 'CiG', 'Inter.', 'Fee', 'ROI', 'Princip.')
+    yield('Month', 'CashInGame', 'Inter.', 'Fee', 'ROI', 'Princip.')
 
     for row in getDataFromCSVfile(DATA_FOLDER + LENDY_CSV_FILE):
         rowData = getRowData(row)
@@ -228,7 +247,9 @@ def getTotalByMonth():
             else:
                 previousMonthYear = 12, currentMonthDate.year - 1
 
-            yield(str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), round(previousMonthCashInGame, 2), round(previousMonthInterestsReceived, 2), round(previousMonthFee, 2), round(roi, 6), round(previousMonthPrincipalRepaid, 2))
+            yield(str(previousMonthYear[0]) + "." + str(previousMonthYear[1]), format(previousMonthCashInGame, '.2f'),
+                  format(previousMonthInterestsReceived, '.2f'), format(previousMonthFee, '.2f'), format(roi, '.4f'),
+                  format(previousMonthPrincipalRepaid, '.2f'))
 
     # ongoing month
     # yield(currentMonthDate.strftime('%-m.%Y'), round(cashInGame, 2), round(interestsReceived, 2), '', '', round(principalRepaid, 2))
@@ -239,14 +260,14 @@ def getCashFlow():
         rowData = getRowData(row)
 
         if rowData['cashFlowChange']:
-            yield (rowData['rawDate'], rowData['cashFlowChange'])
+            yield (rowData['rawDate'], format(rowData['cashFlowChange'], '.2f'))
 
 
 def main():
-    parser = argparse.ArgumentParser(description='This script produces statistics based on Twino\'s exported file.')
-    parser.add_argument('-c', '--convert', dest='convert', action='store', default=False, metavar=('CSV_FILENAME'),
-                        help='Converting ./data/Lendy_Statement_YYYYMMDD-YYYYMMDD.csv to ./data/lendy.csv')
-    parser.add_argument('-f', '--fees', dest='getFees', action='store_true', default=False, help='Paid fees to Zonky')
+    parser = argparse.ArgumentParser(description='This script produces statistics based on Lendy\'s transactions file from My Account - Transactions tab.')
+    parser.add_argument('-c', '--convert', dest='convert', action='store', default=False, metavar=('FILEPATH'),
+                        help='Converting FILEPATH to ' + DATA_FOLDER + LENDY_CSV_FILE)
+    parser.add_argument('-f', '--fees', dest='getFees', action='store_true', default=False, help='Paid fees to Lendy')
     parser.add_argument('-t', '--total', dest='getTotals', action='store_true', default=False, help='Account statement')
     parser.add_argument('-tbm', '--totalbymonth', dest='getTotalByMonth', action='store_true', default=False, help='Account statement per month')
     parser.add_argument('-p', '--previousmonth', dest='getPreviousMonth', action='store_true', default=False, help='Account statement for last month')
